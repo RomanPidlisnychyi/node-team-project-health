@@ -1,8 +1,9 @@
-require("dotenv").config();
-const express = require("express");
+require('dotenv').config();
+const express = require('express');
 const mongoose = require("mongoose");
-const cors = require("cors");
-const morgan = require("morgan");
+const cors = require('cors');
+const morgan = require('morgan');
+const userRouter = require('./routers/userRouter');
 
 const app = express();
 
@@ -12,11 +13,7 @@ app.use(express.json());
 app.use(cors({ origin: "http://localhost:3000" }));
 app.use(morgan("combined"));
 
-app.get("/", (req, res, next) => {
-  console.log("All worked!");
-
-  return res.status(200).json({ message: "All worked!" });
-});
+app.use('/users', userRouter);
 
 async function start() {
   try {
