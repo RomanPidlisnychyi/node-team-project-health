@@ -1,8 +1,25 @@
-const { Router } = require('express');
+const express = require("express");
+const router = express.Router();
+
+const { signUp } = require('../controllers/authController');
+const { signIn } = require('../controllers/authController');
 const { logout } = require('../controllers/authController');
 
-const authRouter = Router();
+const { validateCreateUser } = require('../controllers/authController');
+const { validateSingIn } = require('../controllers/authController');
+const { verifiEmail } = require('../controllers/authController');
+const { authorize } = require('../controllers/authController');
 
-authRouter.post('/logout', logout);
+router.post(
+    "/register",
+    validateCreateUser,
+    signUp
+);
 
-module.exports = authRouter;
+router.put("/login", validateSingIn, signIn);
+
+router.get("/verify/:verificationToken", verifiEmail);
+
+router.patch("/logout", authorize, logout);
+
+module.exports = router;
