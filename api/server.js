@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const authRouter = require('./routers/authRouter');
 const userRouter = require('./routers/userRouter');
 const initDatabase = require('./helpers/initDatabase');
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(morgan('combined'));
 
+app.use('/auth', authRouter);
 app.use('/users', userRouter);
 
 app.listen(PORT, async () => {
