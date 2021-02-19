@@ -1,5 +1,4 @@
-module.exports.asyncWrapper = (callback) => {
-  console.log("1");
+module.exports.asyncWrapper = callback => {
   return function (req, res, next) {
     callback(req, res, next).catch(next);
   };
