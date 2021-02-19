@@ -5,8 +5,13 @@ const userSchema = new Schema({
   email: { type: String, require: true, unique: true },
   password: { type: String, require: true },
   name: { type: String, require: true },
-  params: { type: 'ObjectId', ref: 'Product' },
-  rations: [{ type: 'ObjectId', ref: 'Ration' }],
+  params: {
+    height: { type: String, require: true },
+    age: { type: String, require: true },
+    weight: { type: String, require: true },
+    desiredWeight: { type: String, require: true },
+    bloodType: { type: String, require: true },
+  },
   verificationToken: String,
   token: String,
 });
