@@ -1,7 +1,15 @@
-const { validateCreateUser } = require('../controllers/authController');
-const { validateSingIn } = require('../controllers/authController');
-const { verifiEmail } = require('../controllers/authController');
-const { authorize } = require('../controllers/authController');
+const { Router } = require('express');
+const {
+  validateCreateUser,
+  validateSingIn,
+  verifiEmail,
+  authorize,
+  signUp,
+  signIn,
+  logout,
+} = require('../controllers/authController');
+
+const router = Router();
 
 router.post('/register', validateCreateUser, signUp);
 
