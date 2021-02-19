@@ -1,8 +1,14 @@
-const { Router } = require('express');
-const { logout, authorized } = require('../controllers/authController');
+const { validateCreateUser } = require('../controllers/authController');
+const { validateSingIn } = require('../controllers/authController');
+const { verifiEmail } = require('../controllers/authController');
+const { authorize } = require('../controllers/authController');
 
-const authRouter = Router();
+router.post('/register', validateCreateUser, signUp);
 
-authRouter.post('/logout', authorized, logout);
+router.put('/login', validateSingIn, signIn);
 
-module.exports = authRouter;
+router.get('/verify/:verificationToken', verifiEmail);
+
+router.patch('/logout', authorize, logout);
+
+module.exports = router;
