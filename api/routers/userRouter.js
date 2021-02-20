@@ -10,4 +10,9 @@ userRouter.get('/products', asyncWrapper(getProducts));
 userRouter.get('/infobyday', asyncWrapper(getRationByData));
 userRouter.get('/test', asyncWrapper(pushRationByData2));
 
-module.exports = userRouter;
+module.exports = userRouter; 
+
+const express = require("express");
+const router = express.Router();
+
+module.exports = router;
