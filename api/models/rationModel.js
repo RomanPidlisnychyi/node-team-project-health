@@ -16,3 +16,5 @@ const rationSchema = new Schema({
 const rationModel = mongoose.model("Ration", rationSchema);
 
 module.exports = rationModel;
+
+
