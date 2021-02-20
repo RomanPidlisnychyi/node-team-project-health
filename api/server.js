@@ -4,6 +4,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const authRouter = require('./routers/authRouter');
 const userRouter = require('./routers/userRouter');
+const {connect} = require('./helpers/dataBase');
 const calorieRouter = require('./routers/calorieRouter');
 const initDatabase = require('./helpers/initDatabase');
 
@@ -17,6 +18,7 @@ app.use(morgan('combined'));
 
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
+connect();
 app.use('/calories', calorieRouter);
 
 app.listen(PORT, async () => {
