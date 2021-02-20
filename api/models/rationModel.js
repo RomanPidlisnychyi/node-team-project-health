@@ -1,23 +1,20 @@
-const mongoose = require('mongoose');
-const { Schema, Types: { ObjectId } } = mongoose;
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 const rationSchema = new Schema({
-    data: {
-        type: String,
-        required: true
+  date: { type: String, required: true },
+  userId: { type: String, required: true },
+  rationItems: [
+    {
+      // product: { type: "ObjectId", ref: "products", required: true },
+      product: { type: String },
+      weight: { type: Number },
     },
-    userId: ObjectId,
-    rationItems: [{
-        productId: {
-            type: ObjectId,
-            required: true
-        },
-        weight: {
-            type: Number,
-            required: true,
-        } 
-    }] 
-})
+  ],
+});
 
-const rationModel = mongoose.model('rations', rationSchema);
+const rationModel = mongoose.model("Ration", rationSchema);
+
 module.exports = rationModel;
+
+

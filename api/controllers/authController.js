@@ -1,13 +1,13 @@
-const Joi = require('joi');
-const bcryptjs = require('bcrypt');
-const userModel = require('../models/userModel');
-const jwt = require('jsonwebtoken');
-const uuid = require('uuid');
-const sgMail = require('@sendgrid/mail');
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const Joi = require("joi");
+const bcryptjs = require("bcrypt");
+const userModel = require("../models/userModel");
+const jwt = require("jsonwebtoken");
+const uuid = require("uuid");
+const sgMail = require("@sendgrid/mail");
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
-const UnauthorizedError = require('../errors/UnauthorizedError');
+const UnauthorizedError = require("../errors/UnauthorizedError");
 
 const signUp = async (req, res, next) => {
   try {
@@ -18,7 +18,7 @@ const signUp = async (req, res, next) => {
     if (existingUser) {
       return res
         .status(400)
-        .send({ message: 'User with such email already exists' });
+        .send({ message: "User with such email already exists" });
     }
 
     const passwordHash = await bcryptjs.hash(password, 4);
@@ -46,14 +46,14 @@ const signIn = async (req, res, next) => {
 
     const user = await userModel.findUserByEmail(email);
 
-    if (!user || user.status !== 'Verified') {
-      return res.status(400).send({ message: 'Authentication failed' });
+    if (!user || user.status !== "Verified") {
+      return res.status(400).send({ message: "Authentication failed" });
     }
 
     const isPasswordValid = await bcryptjs.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(400).send({ message: 'Authentication failed' });
+      return res.status(400).send({ message: "Authentication failed" });
     }
 
     const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -79,7 +79,7 @@ const logout = async (req, res, next) => {
 
     await userModel.updateToken(user._id, null);
 
-    return res.status(204).send({ message: 'User was successfully logout' });
+    return res.status(204).send({ message: "User was successfully logout" });
   } catch (err) {
     next(err);
   }
@@ -87,22 +87,22 @@ const logout = async (req, res, next) => {
 
 const authorize = async (req, res, next) => {
   try {
-    const authorizationHeader = req.get('Authorization' || '');
+    const authorizationHeader = req.get("Authorization" || "");
     if (!authorizationHeader) {
-      next(new UnauthorizedError('User not authorized'));
+      next(new UnauthorizedError("User not authorized"));
     }
-    const token = authorizationHeader.replace('Bearer ', '');
+    const token = authorizationHeader.replace("Bearer ", "");
 
     let userId;
     try {
       userId = await jwt.verify(token, process.env.JWT_SECRET).id;
     } catch (err) {
-      next(new UnauthorizedError('User not authorized'));
+      next(new UnauthorizedError("User not authorized"));
     }
 
     const user = await userModel.findById(userId);
     if (!user || user.token !== token) {
-      throw new UnauthorizedError('User not authorized');
+      throw new UnauthorizedError("User not authorized");
     }
 
     req.user = user;
@@ -114,7 +114,7 @@ const authorize = async (req, res, next) => {
   }
 };
 
-const sendVerificationEmail = async user => {
+const sendVerificationEmail = async (user) => {
   try {
     const verificationToken = uuid.v4();
 
@@ -125,8 +125,8 @@ const sendVerificationEmail = async user => {
     const msg = {
       to: user.email,
       from: process.env.NODEMAILER_USER,
-      subject: 'Email verification',
-      text: 'Please varificate your email',
+      subject: "Email verification",
+      text: "Please varificate your email",
       html: `<p>Please varificate your <a href="http://localhost:3001/auth/verify/${verificationToken}"><strong>email</strong></a></p>`,
     };
 
@@ -145,7 +145,7 @@ const verifiEmail = async (req, res, next) => {
     );
 
     if (!userToVerify) {
-      return res.status(404).send({ message: 'User not found' });
+      return res.status(404).send({ message: "User not found" });
     }
 
     await userModel.verifyUser(userToVerify._id);
