@@ -8,6 +8,7 @@ const rationSchema = new Schema({
     {
       productId: { type: String },
       weight: { type: Number },
+      calories: { type: Number },
     },
   ],
 });
