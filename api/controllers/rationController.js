@@ -13,6 +13,7 @@ const addProduct = async (req, res, next) => {
 
   const productInDb = await productModel.findOne({ "title.ru": productTitle });
   const productId = productInDb._id;
+  const calories = Math.round((productInDb._doc.calories * weight) / 100);
 
   const userRation = await rationModel.findOne({
     $and: [{ userId }, { date }],
@@ -25,6 +26,7 @@ const addProduct = async (req, res, next) => {
         {
           productId,
           weight,
+          calories,
         },
       ],
     });
@@ -43,6 +45,7 @@ const addProduct = async (req, res, next) => {
           rationItems: {
             productId,
             weight,
+            calories,
           },
         },
       },
@@ -53,7 +56,12 @@ const addProduct = async (req, res, next) => {
   }
 
   const newWeight = productExist.weight + weight;
-  const updatedProduct = { productId, weight: newWeight };
+  const newCalories = Math.round((productInDb._doc.calories * newWeight) / 100);
+  const updatedProduct = {
+    productId,
+    weight: newWeight,
+    calories: newCalories,
+  };
 
   await rationModel.findOneAndUpdate(
     { $and: [{ userId }, { date }] },
@@ -133,6 +141,7 @@ const validateUpdateRation = (req, res, next) => {
     date: Joi.string(),
     productTitle: Joi.string(),
     weight: Joi.number(),
+    // calories: Joi.number(),
   }).min(1);
 
   const validationResult = validationRules.validate(req.body);
