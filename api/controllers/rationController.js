@@ -10,7 +10,8 @@ const { NotFoundError, ValidationError } = require("../errors/errors");
 const addProduct = async (req, res, next) => {
   const { date, productTitle, weight } = req.body;
   const userId = req.user._id;
-  const productInDb = await productModel.findOne({ name: productTitle }); //*відкоригувати!!!*//
+
+  const productInDb = await productModel.findOne({ "title.ru": productTitle });
   const productId = productInDb._id;
 
   const userRation = await rationModel.findOne({
@@ -72,7 +73,7 @@ const addProduct = async (req, res, next) => {
 const deleteProduct = async (req, res, next) => {
   const productId = req.params.id;
   const userId = req.user._id;
-  const date = req.body.date; //*відкоригувати!!!*//
+  const date = req.body.date;
 
   const rationToUpdate = await rationModel.findOne({
     $and: [{ userId }, { date }],
