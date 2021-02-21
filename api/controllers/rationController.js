@@ -4,11 +4,14 @@ const {
 } = require("mongoose");
 
 const rationModel = require("../models/rationModel");
+const productModel = require("../models/productModel");
 const { NotFoundError, ValidationError } = require("../errors/errors");
 
 const addProduct = async (req, res, next) => {
-  const { date, product, weight } = req.body;
+  const { date, productTitle, weight } = req.body;
   const userId = req.user._id;
+  const productInDb = await productModel.findOne({ name: productTitle }); //*відкоригувати!!!*//
+  const productId = productInDb._id;
 
   const userRation = await rationModel.findOne({
     $and: [{ userId }, { date }],
@@ -19,7 +22,7 @@ const addProduct = async (req, res, next) => {
       userId,
       rationItems: [
         {
-          product,
+          productId,
           weight,
         },
       ],
@@ -29,7 +32,7 @@ const addProduct = async (req, res, next) => {
   }
 
   const productExist = userRation.rationItems.find(
-    (item) => item.product === product
+    (item) => item.productId === productId.toString()
   );
   if (!productExist) {
     const ration = await rationModel.findOneAndUpdate(
@@ -37,7 +40,7 @@ const addProduct = async (req, res, next) => {
       {
         $push: {
           rationItems: {
-            product,
+            productId,
             weight,
           },
         },
@@ -49,7 +52,7 @@ const addProduct = async (req, res, next) => {
   }
 
   const newWeight = productExist.weight + weight;
-  const updatedProduct = { product, weight: newWeight };
+  const updatedProduct = { productId, weight: newWeight };
 
   await rationModel.findOneAndUpdate(
     { $and: [{ userId }, { date }] },
@@ -69,18 +72,20 @@ const addProduct = async (req, res, next) => {
 const deleteProduct = async (req, res, next) => {
   const productId = req.params.id;
   const userId = req.user._id;
+  const date = req.body.date; //*відкоригувати!!!*//
 
-  const rationToUpdate = await rationModel.findOne({ userId });
+  const rationToUpdate = await rationModel.findOne({
+    $and: [{ userId }, { date }],
+  });
 
   if (!rationToUpdate) {
-    throw new NotFoundError("there is no ration for this user");
-    // res.status(400).json("there is no ration for this user");
+    throw new NotFoundError("there is no ration for this user at this date");
   }
 
   const rationId = rationToUpdate._id;
 
   const lastUpdate = await rationModel.findOneAndUpdate(
-    { userId },
+    { $and: [{ userId }, { date }] },
     {
       $pull: { rationItems: { _id: productId } },
     },
@@ -109,7 +114,7 @@ const validateId = (req, res, next) => {
 const validateCreateRation = (req, res, next) => {
   const validationRules = Joi.object({
     date: Joi.string().required(),
-    product: Joi.string().required(),
+    productTitle: Joi.string().required(),
     weight: Joi.number().required(),
   });
 
@@ -125,7 +130,7 @@ const validateCreateRation = (req, res, next) => {
 const validateUpdateRation = (req, res, next) => {
   const validationRules = Joi.object({
     date: Joi.string(),
-    product: Joi.string(),
+    productTitle: Joi.string(),
     weight: Joi.number(),
   }).min(1);
 
