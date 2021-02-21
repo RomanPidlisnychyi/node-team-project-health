@@ -7,7 +7,6 @@ const rationSchema = new Schema({
   rationItems: [
     {
       productId: { type: String },
-      // productId: { type: "ObjectId", ref: "products" },
       weight: { type: Number },
     },
   ],
