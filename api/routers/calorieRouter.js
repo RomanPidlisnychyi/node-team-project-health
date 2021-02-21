@@ -1,31 +1,27 @@
 const { Router } = require("express");
 const calorieRouter = Router();
 
+const { authorize } = require("../controllers/authController");
 const { asyncWrapper } = require("../helpers/asyncWrapper");
 const {
   getRecommendedDailyCalorieNorm,
+  createUserParams,
 } = require("../controllers/calorieController");
-const {
-  getListNotRecomendedProducts,
-} = require("../controllers/notRecomProductController");
+const { validateUserParams } = require("../validation/userParamsValidator");
 
-// const { authorizeUser } = require("./middlewares/authMiddleware");
-
-//* POST http://localhost:3000/calories публичный энд-поинт на получение дневной нормы ккал
+//* POST http://localhost:3001/calories публичный энд-поинт на получение дневной нормы ккал
 calorieRouter.post(
   "/",
+  validateUserParams,
   asyncWrapper(getRecommendedDailyCalorieNorm)
-  //   asyncWrapper(getListNotRecomendedProducts)
 );
 
-//* POST http://localhost:3000/calories приватный энд-поинт на получение дневной нормы ккал
-// calorieRouter.post(
+//* PATCH http://localhost:3001/calories приватный энд-поинт на получение дневной нормы ккал
+// calorieRouter.patch(
 //   "/",
-//   authorizeUser,
-//   asyncWrapper(getRecommendedDailyCalorieNorm),
+//   authorize,
+//   validateUserParams,
+//   asyncWrapper(createUserParams)
 // );
-
-//* GET http://localhost:3000/calories публичный энд-поинт на получение списка нерекомендуемых продуктов
-calorieRouter.get("/", asyncWrapper(getListNotRecomendedProducts));
 
 module.exports = calorieRouter;

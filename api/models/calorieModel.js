@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const calorieSchema = new mongoose.Schema({
   // params: {
-    growth: { type: Number, required: true },
-    age: { type: Number, required: true },
-    currentWeight: { type: Number, required: true },
-    desiredWeight: { type: Number, required: true },
-    bloodGroup: { type: Number, required: true },
+  growth: { type: Number, required: true },
+  age: { type: Number, required: true },
+  currentWeight: { type: Number, required: true },
+  desiredWeight: { type: Number, required: true },
+  bloodGroup: { type: Number, required: true },
   // },
 });
 
