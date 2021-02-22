@@ -1,18 +1,27 @@
+const { array } = require('joi');
 const mongoose = require('mongoose');
 const { Schema, Types: { ObjectId } } = mongoose;
 
 const productSchema = new Schema({
-    name: {
-        type: String,
-        lowercase: true,
-        required: true,
-        unique: true
+    _id: ObjectId,
+    categories: [
+        String
+    ],
+    weight: { type: Number, required: true },
+    // others : Schema.Types.Mixed,
+    title: {
+        type: Map,
+        of: String,
     },
-    calorie: {
+    calories: {
         type: Number,
-        required: true
-    }
+    },
+    groupBloodNotAllowed: [Boolean],    
 })
 
+productSchema.index({"title.ru": 'text'},  { language: "russian" });
+// productSchema.index({"title.ua": 'text'},  { language: "ukrainian" });
+
 const productModel = mongoose.model('products', productSchema);
+productModel.createIndexes();
 module.exports = productModel;

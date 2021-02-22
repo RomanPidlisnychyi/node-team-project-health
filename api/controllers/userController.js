@@ -4,15 +4,19 @@ const mongoose = require('mongoose');
 const { Schema, Types: { ObjectId } } = mongoose;
 const validator = require('../validation/validator');
 const idSchema = require('../validation/idSchema');
-
-// const register = async (req, res, next) =>
-//   res.status(201).json({ message: `'It's ok!` });
+const products = require('../helpers/products.json');
 
 const getProducts = async (req, res, next) => {
   const findedProducts = [];
 
   for (const [key, value] of Object.entries(req.query)) {
-    const products = await productModel.find({ name: key.toLowerCase() });
+
+    // const products = await productModel.find({$or:[ { "title.ru": key }, {"title.ua": key}]});
+    // const products = await productModel.find({ $text: { $search: key } });
+    // const products = await productModel.find({"title.ru": {$regex: key}});
+
+    const pattern = new RegExp(key, "i");
+    const products = await productModel.find({"title.ru": pattern});    
 
     if (products.length > 0) {
       findedProducts.push(...products);
@@ -22,6 +26,36 @@ const getProducts = async (req, res, next) => {
   return findedProducts.length > 0
     ? res.status(201).send(findedProducts)
     : res.status(404).send({ message: "Not found" });
+}
+
+const getAllTitles = async (req, res, next) => {
+  const titles = await productModel.find({});
+  if (!titles) {
+    return res.status(404).send({message: 'Not found'});
+  }
+
+  const filteredTitles = titles.map(el => el._doc.title)
+  return res.status(201).send(filteredTitles);
+}
+
+const pushProductsToDB = async (req, res, next) => {
+  const productsFiltered = [];
+
+  const tt = products.map(item => {
+    const tmpObj = {};
+    for (const [key, value] of Object.entries(item)) {
+      if (key !== '_id') {
+        tmpObj[key] = value;
+      } 
+    }
+    productsFiltered.push(tmpObj);
+  })
+
+  const ress = await productModel.insertMany(productsFiltered);
+
+  if (ress) {
+    res.status(201).send({message: ' ok'});
+  }
 }
 
 const pushRationByData = async (req, res, next) => {
@@ -51,8 +85,6 @@ const pushRationByData2 = async (req, res, next) => {
   }
 
   const resObject = {
-    // data: body.data,
-    // userId: ObjectId(body.userId),
     rationItems: [
       {
         productId: ObjectId(item.productId),
@@ -72,8 +104,8 @@ const pushRationByData2 = async (req, res, next) => {
 }
 
 const getRationByData = async (req, res, next) => {
-  const { data, userId } = req.body;
-  if (!data || !userId) {
+  const { date, userId } = req.body;
+  if (!date || !userId) {
     return res.status(400).send({ message: 'request is not complette' });
   }
 
@@ -83,7 +115,7 @@ const getRationByData = async (req, res, next) => {
   }
 
   const ress = await rationModel.find({
-    data,
+    date,
     userId
   })
 
@@ -92,15 +124,15 @@ const getRationByData = async (req, res, next) => {
   }
 
   if (ress) {
-    // console.log('ress: ', ress);
     res.status(201).send(ress);
   }
 }
 
 module.exports = {
-  // register,
   getProducts,
   getRationByData,
   pushRationByData,
-  pushRationByData2
+  pushRationByData2,
+  pushProductsToDB,
+  getAllTitles
 };

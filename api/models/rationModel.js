@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose;
+// const { Schema } = mongoose;
+const { Schema, Types: { ObjectId } } = mongoose;
 
 const rationSchema = new Schema({
   date: { type: String, required: true },
@@ -7,13 +8,13 @@ const rationSchema = new Schema({
   rationItems: [
     {
       // product: { type: "ObjectId", ref: "products", required: true },
-      product: { type: String },
+      productId: { type: ObjectId },
       weight: { type: Number },
     },
   ],
 });
 
-const rationModel = mongoose.model("Ration", rationSchema);
+const rationModel = mongoose.model("rations", rationSchema);
 
 module.exports = rationModel;
 
