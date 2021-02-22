@@ -1,21 +1,32 @@
+const Joi = require("joi");
 const {
   Types: { ObjectId },
 } = require("mongoose");
+
 const rationModel = require("../models/rationModel");
+const productModel = require("../models/productModel");
+const { NotFoundError, ValidationError } = require("../errors/errors");
 
 const addProduct = async (req, res, next) => {
-  const { product, weight } = req.body;
+  const { date, productTitle, weight } = req.body;
   const userId = req.user._id;
 
-  const userRation = await rationModel.findOne({ userId });
+  const productInDb = await productModel.findOne({ "title.ru": productTitle });
+  const productId = productInDb._id;
+  const calories = Math.round((productInDb._doc.calories * weight) / 100);
+
+  const userRation = await rationModel.findOne({
+    $and: [{ userId }, { date }],
+  });
   if (!userRation) {
     const newRation = await rationModel.create({
       ...req.body,
       userId,
       rationItems: [
         {
-          product,
+          productId,
           weight,
+          calories,
         },
       ],
     });
@@ -24,17 +35,17 @@ const addProduct = async (req, res, next) => {
   }
 
   const productExist = userRation.rationItems.find(
-    (item) => item.product === product
+    (item) => item.productId === productId.toString()
   );
-  console.log(productExist);
   if (!productExist) {
     const ration = await rationModel.findOneAndUpdate(
-      { userId },
+      { $and: [{ userId }, { date }] },
       {
         $push: {
           rationItems: {
-            product,
+            productId,
             weight,
+            calories,
           },
         },
       },
@@ -45,11 +56,22 @@ const addProduct = async (req, res, next) => {
   }
 
   const newWeight = productExist.weight + weight;
-  console.log(newWeight);
+  const newCalories = Math.round((productInDb._doc.calories * newWeight) / 100);
+  const updatedProduct = {
+    productId,
+    weight: newWeight,
+    calories: newCalories,
+  };
+
+  await rationModel.findOneAndUpdate(
+    { $and: [{ userId }, { date }] },
+    { $pull: { rationItems: productExist } },
+    { new: true }
+  );
 
   const updatedRation = await rationModel.findOneAndUpdate(
-    { userId },
-    { rationItems: [{ product, weight: newWeight }] },
+    { $and: [{ userId }, { date }] },
+    { $push: { rationItems: updatedProduct } },
     { new: true }
   );
 
@@ -59,17 +81,20 @@ const addProduct = async (req, res, next) => {
 const deleteProduct = async (req, res, next) => {
   const productId = req.params.id;
   const userId = req.user._id;
+  const date = req.body.date;
 
-  const rationToUpdate = await rationModel.findOne({ userId });
+  const rationToUpdate = await rationModel.findOne({
+    $and: [{ userId }, { date }],
+  });
 
   if (!rationToUpdate) {
-    res.status(400).json("there is no ration for this user");
+    throw new NotFoundError("there is no ration for this user at this date");
   }
 
   const rationId = rationToUpdate._id;
 
   const lastUpdate = await rationModel.findOneAndUpdate(
-    { userId },
+    { $and: [{ userId }, { date }] },
     {
       $pull: { rationItems: { _id: productId } },
     },
@@ -79,7 +104,7 @@ const deleteProduct = async (req, res, next) => {
   if (lastUpdate.rationItems.length === 0) {
     await rationModel.findByIdAndDelete(rationId);
 
-    return res.status(204).json("ration deleted");
+    return res.status(204).send();
   }
 
   return res.status(204).send();
@@ -95,8 +120,43 @@ const validateId = (req, res, next) => {
   next();
 };
 
+const validateCreateRation = (req, res, next) => {
+  const validationRules = Joi.object({
+    date: Joi.string().required(),
+    productTitle: Joi.string().required(),
+    weight: Joi.number().required(),
+  });
+
+  const validationResult = validationRules.validate(req.body);
+
+  if (validationResult.error) {
+    throw new ValidationError("missing required field");
+  }
+
+  next();
+};
+
+const validateUpdateRation = (req, res, next) => {
+  const validationRules = Joi.object({
+    date: Joi.string(),
+    productTitle: Joi.string(),
+    weight: Joi.number(),
+    // calories: Joi.number(),
+  }).min(1);
+
+  const validationResult = validationRules.validate(req.body);
+
+  if (validationResult.error) {
+    throw new ValidationError("missing required field");
+  }
+
+  next();
+};
+
 module.exports = {
   addProduct,
   deleteProduct,
   validateId,
+  validateCreateRation,
+  validateUpdateRation,
 };

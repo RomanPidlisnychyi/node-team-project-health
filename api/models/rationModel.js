@@ -7,9 +7,9 @@ const rationSchema = new Schema({
   userId: { type: String, required: true },
   rationItems: [
     {
-      // product: { type: "ObjectId", ref: "products", required: true },
-      productId: { type: ObjectId },
+      productId: { type: String },
       weight: { type: Number },
+      calories: { type: Number },
     },
   ],
 });
@@ -17,5 +17,3 @@ const rationSchema = new Schema({
 const rationModel = mongoose.model("rations", rationSchema);
 
 module.exports = rationModel;
-
-
