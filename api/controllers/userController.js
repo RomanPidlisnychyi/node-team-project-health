@@ -170,7 +170,7 @@ module.exports = {
   pushRationByData,
   pushRationByData2,
   pushProductsToDB,
-  getAllTitles
+  getAllTitles,
   getCurrentUser,
   updateUserParams,
 };
