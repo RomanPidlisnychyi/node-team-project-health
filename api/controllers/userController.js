@@ -5,6 +5,8 @@ const { Schema, Types: { ObjectId } } = mongoose;
 const validator = require('../validation/validator');
 const idSchema = require('../validation/idSchema');
 const products = require('../helpers/products.json');
+const userModel = require("../models/userModel");
+const { prepareUsersResponse } = require("../helpers/prepareUserResponse");
 
 const getProducts = async (req, res, next) => {
   const findedProducts = [];
@@ -26,7 +28,7 @@ const getProducts = async (req, res, next) => {
   return findedProducts.length > 0
     ? res.status(201).send(findedProducts)
     : res.status(404).send({ message: "Not found" });
-}
+};
 
 const getAllTitles = async (req, res, next) => {
   const titles = await productModel.find({});
@@ -61,57 +63,59 @@ const pushProductsToDB = async (req, res, next) => {
 const pushRationByData = async (req, res, next) => {
   const ress = await rationModel.create({
     data: Date.now(),
-    userId: ObjectId('602ed4e5c0d9f92f80ddb778'),
-    rationItems: [{
-      productId: ObjectId('602ed4962fbace1378a7b1e8'),
-      weight: 1200
-    }]
-  })
+    userId: ObjectId("602ed4e5c0d9f92f80ddb778"),
+    rationItems: [
+      {
+        productId: ObjectId("602ed4962fbace1378a7b1e8"),
+        weight: 1200,
+      },
+    ],
+  });
   if (ress) {
-    console.log('ress: ', ress);
+    console.log("ress: ", ress);
     res.status(201).send(ress);
   }
-}
+};
 
 const pushRationByData2 = async (req, res, next) => {
   const body = {
     data: Date.now(),
-    userId: '602ed4e5c0d9f92f80ddb778'
-  }
+    userId: "602ed4e5c0d9f92f80ddb778",
+  };
 
   const item = {
-    productId: '602ed4962fbace1378a7b1e8',
-    weight: 200
-  }
+    productId: "602ed4962fbace1378a7b1e8",
+    weight: 200,
+  };
 
   const resObject = {
     rationItems: [
       {
         productId: ObjectId(item.productId),
-        weight: item.weight
-      }
-    ]
-  }
+        weight: item.weight,
+      },
+    ],
+  };
 
   const ress = await rationModel.updateOne(
-    { _id: ObjectId('60302ccf06563221d8713c7c') },
+    { _id: ObjectId("60302ccf06563221d8713c7c") },
     { $addToSet: resObject }
-  )
+  );
   if (ress) {
-    console.log('ress: ', ress);
+    console.log("ress: ", ress);
     res.status(201).send(ress);
   }
-}
+};
 
 const getRationByData = async (req, res, next) => {
-  const { date, userId } = req.body;
+const { date, userId } = req.body;
   if (!date || !userId) {
     return res.status(400).send({ message: 'request is not complette' });
   }
 
   const validate = await validator({ id: userId }, idSchema);
   if (validate) {
-    return res.status(400).send({ message: 'Incorrect id.' });
+    return res.status(400).send({ message: "Incorrect id." });
   }
 
   const ress = await rationModel.find({
@@ -120,13 +124,45 @@ const getRationByData = async (req, res, next) => {
   })
 
   if (ress.length === 0) {
-    return res.status(404).send({ message: 'Not found' });
+    return res.status(404).send({ message: "Not found" });
   }
 
   if (ress) {
     res.status(201).send(ress);
   }
-}
+};
+
+getCurrentUser = async (req, res) => {
+  const [userForResponse] = await prepareUsersResponse([req.user]);
+
+  return res.status(200).send(userForResponse);
+};
+
+const updateUserParams = async (req, res) => {
+  const userId = req.user.id;
+
+  const { height, age, currentWeight, desiredWeight } = req.body;
+
+  const paramsToUpdate = await userModel.findByIdAndUpdateUserParams(
+    userId,
+    req.body
+  );
+
+  if (!paramsToUpdate) {
+    return res.status(404).send({ message: "User not authorized!" });
+  }
+
+  const dailyCalorieNorm =
+    10 * currentWeight +
+    6.25 * height -
+    5 * age -
+    161 -
+    10 * (currentWeight - desiredWeight);
+
+  res.status(200).send({
+    message: `Your recommended daily calorie norm: ${dailyCalorieNorm} cal.`,
+  });
+};
 
 module.exports = {
   getProducts,
@@ -135,4 +171,6 @@ module.exports = {
   pushRationByData2,
   pushProductsToDB,
   getAllTitles
+  getCurrentUser,
+  updateUserParams,
 };

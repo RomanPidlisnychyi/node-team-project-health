@@ -47,13 +47,13 @@ const signIn = async (req, res, next) => {
     const user = await userModel.findUserByEmail(email);
 
     if (!user || user.status !== "Verified") {
-      return res.status(400).send({ message: "Authentication failed" });
+      return res.status(400).send({ message: "Authentication failed1" });
     }
 
     const isPasswordValid = await bcryptjs.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(400).send({ message: "Authentication failed" });
+      return res.status(400).send({ message: "Authentication failed2" });
     }
 
     const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
