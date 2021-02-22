@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose;
+// const { Schema } = mongoose;
+const { Schema, Types: { ObjectId } } = mongoose;
 
 const rationSchema = new Schema({
   date: { type: String, required: true },
@@ -13,6 +14,6 @@ const rationSchema = new Schema({
   ],
 });
 
-const rationModel = mongoose.model("Ration", rationSchema);
+const rationModel = mongoose.model("rations", rationSchema);
 
 module.exports = rationModel;
