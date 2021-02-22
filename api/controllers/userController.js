@@ -112,91 +112,32 @@ getCurrentUser = async (req, res) => {
 };
 
 const updateUserParams = async (req, res) => {
-  console.log("req.body:", req.body);
-  console.log("req.user:", req.user);
-  // console.log("req.params:", req.params);
-
   const userId = req.user.id;
-  console.log("userId:", userId);
 
-  const { growth, age, currentWeight, desiredWeight, bloodGroup } = req.body;
+  const { height, age, currentWeight, desiredWeight } = req.body;
 
-  // const createUserParams = await calorieModel.create(req.body);
   const paramsToUpdate = await userModel.findByIdAndUpdateUserParams(
     userId,
     req.body
   );
 
-  // const paramsToUpdate = await userModel.findByIdAndUpdate(
-  //   userId,
-  //   {
-  //     // $push: {
-  //     params: req.body,
-  //     // growth,
-  //     //   age,
-  //     //   currentWeight,
-  //     //   desiredWeight,
-  //     //   bloodGroup,
-  //   },
-  //   { new: true }
-  // );
-
-  // const productExist = userRation.rationItems.find(
-  //   (item) => item.product === product
-  // );
-  // if (!productExist) {
-  //   const ration = await rationModel.findOneAndUpdate(
-  //     { $and: [{ userId }, { date }] },
-  //     {
-  //       $push: {
-  //         rationItems: {
-  //           product,
-  //           weight,
-  //         },
-  //       },
-  //     },
-  //     { new: true }
-  //   );
-
-  //   return res.status(201).json(ration);
-  // }
-
-  // const lastUpdate = await rationModel.findOneAndUpdate(
-  //   { userId },
-  //   {
-  //     $pull: { rationItems: { _id: productId } },
-  //   },
-  //   { new: true }
-  // );
-
-  console.log("paramsToUpdate:", paramsToUpdate);
-
   if (!paramsToUpdate) {
-    return res.status(404).send({ message: "Что-то пошло не так!!!!" });
+    return res.status(404).send({ message: "User not authorized!" });
   }
 
-  // const {
-  //   growth,
-  //   age,
-  //   currentWeight,
-  //   desiredWeight,
-  //   bloodGroup,
-  // } = createUserParams;
-
-  // const dailyCalorieNorm =
-  //   10 * currentWeight +
-  //   6.25 * growth -
-  //   5 * age -
-  //   161 -
-  //   10 * (currentWeight - desiredWeight);
+  const dailyCalorieNorm =
+    10 * currentWeight +
+    6.25 * height -
+    5 * age -
+    161 -
+    10 * (currentWeight - desiredWeight);
 
   res.status(200).send({
-    message: `Your recommended daily calorie norm: ${dailyCalorieNorm} cal.111111111111`,
+    message: `Your recommended daily calorie norm: ${dailyCalorieNorm} cal.`,
   });
 };
 
 module.exports = {
-  // register,
   getProducts,
   getRationByData,
   pushRationByData,

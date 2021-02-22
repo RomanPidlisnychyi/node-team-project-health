@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 module.exports.validateUserParams = (req, res, next) => {
   const validationRules = Joi.object({
-    growth: Joi.number().integer().min(90).max(210).positive().required(),
+    height: Joi.number().integer().min(90).max(210).positive().required(),
     age: Joi.number().integer().min(5).max(110).positive().required(),
     currentWeight: Joi.number().integer().min(30).max(300).positive().required(),
     desiredWeight: Joi.number().integer().min(30).max(300).positive().required(),

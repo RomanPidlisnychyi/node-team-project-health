@@ -14,9 +14,9 @@ const userSchema = new Schema({
   params: {
     height: { type: Number, require: true },
     age: { type: Number, require: true },
-    weight: { type: Number, require: true },
+    currentWeight: { type: Number, require: true },
     desiredWeight: { type: Number, require: true },
-    bloodType: { type: Number, require: true },
+    bloodGroup: { type: Number, require: true },
   },
   verificationToken: String,
   token: String,
@@ -72,8 +72,7 @@ async function findByIdAndUpdateUserParams(userId, updateParams) {
   return this.findByIdAndUpdate(
     userId,
     {
-      // $set: {params: updateParams},
-      params: updateParams,
+      $set: {params: updateParams},
     },
     {
       new: true,
