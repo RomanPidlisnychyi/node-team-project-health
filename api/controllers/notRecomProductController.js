@@ -10,6 +10,8 @@ const getListNotRecomendedProducts = async (req, res) => {
     161 -
     10 * (currentWeight - desiredWeight);
 
+ const dailyCalorieNormInteger = Math.round(dailyCalorieNorm);
+
   const fn = (bloodGroup) => {
     const groupBloodNotAllowed = `groupBloodNotAllowed.${bloodGroup}`;
 
@@ -34,10 +36,7 @@ const getListNotRecomendedProducts = async (req, res) => {
     .map((product) => product.categories[0])
     .filter((element, index, array) => array.indexOf(element) == index);
 
-  return res.status(200).send({
-    message: `Your recommended daily calorie norm: ${dailyCalorieNorm} cal.
-    Продукты, которые вам не рекомендуется употреблять: ${listNotProducts}`,
-  });
+  return res.status(200).json({ listNotProducts, dailyCalorieNormInteger });
 };
 
 module.exports = {
