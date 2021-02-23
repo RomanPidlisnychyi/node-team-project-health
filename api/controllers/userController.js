@@ -1,10 +1,13 @@
-const productModel = require('../models/productModel');
-const rationModel = require('../models/rationModel');
-const mongoose = require('mongoose');
-const { Schema, Types: { ObjectId } } = mongoose;
-const validator = require('../validation/validator');
-const idSchema = require('../validation/idSchema');
-const products = require('../helpers/products.json');
+const productModel = require("../models/productModel");
+const rationModel = require("../models/rationModel");
+const mongoose = require("mongoose");
+const {
+  Schema,
+  Types: { ObjectId },
+} = mongoose;
+const validator = require("../validation/validator");
+const idSchema = require("../validation/idSchema");
+const products = require("../helpers/products.json");
 const userModel = require("../models/userModel");
 const { prepareUsersResponse } = require("../helpers/prepareUserResponse");
 
@@ -12,13 +15,12 @@ const getProducts = async (req, res, next) => {
   const findedProducts = [];
 
   for (const [key, value] of Object.entries(req.query)) {
-
     // const products = await productModel.find({$or:[ { "title.ru": key }, {"title.ua": key}]});
     // const products = await productModel.find({ $text: { $search: key } });
     // const products = await productModel.find({"title.ru": {$regex: key}});
 
     const pattern = new RegExp(key, "i");
-    const products = await productModel.find({"title.ru": pattern});    
+    const products = await productModel.find({ "title.ru": pattern });
 
     if (products.length > 0) {
       findedProducts.push(...products);
@@ -33,32 +35,32 @@ const getProducts = async (req, res, next) => {
 const getAllTitles = async (req, res, next) => {
   const titles = await productModel.find({});
   if (!titles) {
-    return res.status(404).send({message: 'Not found'});
+    return res.status(404).send({ message: "Not found" });
   }
 
-  const filteredTitles = titles.map(el => el._doc.title)
+  const filteredTitles = titles.map((el) => el._doc.title);
   return res.status(201).send(filteredTitles);
-}
+};
 
 const pushProductsToDB = async (req, res, next) => {
   const productsFiltered = [];
 
-  const tt = products.map(item => {
+  const tt = products.map((item) => {
     const tmpObj = {};
     for (const [key, value] of Object.entries(item)) {
-      if (key !== '_id') {
+      if (key !== "_id") {
         tmpObj[key] = value;
-      } 
+      }
     }
     productsFiltered.push(tmpObj);
-  })
+  });
 
   const ress = await productModel.insertMany(productsFiltered);
 
   if (ress) {
-    res.status(201).send({message: ' ok'});
+    res.status(201).send({ message: " ok" });
   }
-}
+};
 
 const pushRationByData = async (req, res, next) => {
   const ress = await rationModel.create({
@@ -108,9 +110,9 @@ const pushRationByData2 = async (req, res, next) => {
 };
 
 const getRationByData = async (req, res, next) => {
-const { date, userId } = req.body;
+  const { date, userId } = req.body;
   if (!date || !userId) {
-    return res.status(400).send({ message: 'request is not complette' });
+    return res.status(400).send({ message: "request is not complette" });
   }
 
   const validate = await validator({ id: userId }, idSchema);
@@ -120,8 +122,8 @@ const { date, userId } = req.body;
 
   const ress = await rationModel.find({
     date,
-    userId
-  })
+    userId,
+  });
 
   if (ress.length === 0) {
     return res.status(404).send({ message: "Not found" });
@@ -159,9 +161,9 @@ const updateUserParams = async (req, res) => {
     161 -
     10 * (currentWeight - desiredWeight);
 
-  res.status(200).send({
-    message: `Your recommended daily calorie norm: ${dailyCalorieNorm} cal.`,
-  });
+  const dailyCalorieNormInteger = Math.round(dailyCalorieNorm);
+
+  res.status(200).json({ dailyCalorieNormInteger });
 };
 
 module.exports = {
