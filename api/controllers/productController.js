@@ -23,6 +23,32 @@ const getProductsByQuery = async (req, res, next) => {
     : next(new ErrorConstructor(404));
 };
 
+const getProductsByQueryNew = async (req, res, next) => {
+  const findedProducts = [];
+
+  for (const [key, value] of Object.entries(req.query)) {
+    const pattern = new RegExp(key, 'i');
+    const products = await productModel.find(
+      { 'title.ru': pattern },
+      { 'title.ru': 1, groupBloodNotAllowed: 1 }
+    );
+
+    if (products.length > 0) {
+      findedProducts.push(...products);
+    }
+  }
+
+  const filtredTitles = findedProducts.map(product => ({
+    title: product._doc.title.ru,
+    _id: product._doc._id,
+    groupBloodNotAllowed: product._doc.groupBloodNotAllowed,
+  }));
+
+  return findedProducts.length > 0
+    ? res.status(201).json(filtredTitles)
+    : next(new ErrorConstructor(404));
+};
+
 const getTitlesByLang = async (req, res, next) => {
   const { lg } = req.query;
   const language = lg ? lg : 'ru';
@@ -46,5 +72,6 @@ const getTitlesByLang = async (req, res, next) => {
 
 module.exports = {
   getProductsByQuery,
+  getProductsByQueryNew,
   getTitlesByLang,
 };
