@@ -9,6 +9,7 @@ const rationSchema = new Schema({
       title: { type: String },
       weight: { type: Number },
       calories: { type: Number },
+      groupBloodNotAllowed: [Boolean],
     },
   ],
 });

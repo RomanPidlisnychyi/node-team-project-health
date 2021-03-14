@@ -15,6 +15,7 @@ const addProduct = async (req, res, next) => {
     next(new ErrorConstructor(404));
   }
   const calories = Math.round((productInDb._doc.calories * weight) / 100);
+  const groupBloodNotAllowed = productInDb._doc.groupBloodNotAllowed;
 
   const userRation = await rationModel.findOne({
     $and: [{ userId }, { date }],
@@ -28,6 +29,7 @@ const addProduct = async (req, res, next) => {
           title: productTitle,
           weight,
           calories,
+          groupBloodNotAllowed,
         },
       ],
     });
@@ -47,6 +49,7 @@ const addProduct = async (req, res, next) => {
             title: productTitle,
             weight,
             calories,
+            groupBloodNotAllowed,
           },
         },
       },
@@ -64,6 +67,7 @@ const addProduct = async (req, res, next) => {
     title: productTitle,
     weight: newWeight,
     calories: newCalories,
+    groupBloodNotAllowed,
   };
 
   await rationModel.findOneAndUpdate(
